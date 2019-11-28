@@ -6,8 +6,8 @@ class TreeNode:
         self.left = None
         self.right = None
         self.parent = None
-        self.balance_factor = 0
-        self.height = 1        
+        self.height = 1
+
 
 class AvlTree:
 
@@ -43,30 +43,80 @@ class AvlTree:
                 node.value = v
                 return
 
-    def _rebalance(self, node):
+    @staticmethod
+    def get_height(x):
+        return x.height if x else 0
 
-        get_height = lambda x: x.height if x else 0
+    def _rebalance(self, node):
         
         n = node
         while n:
-            lh = get_height(n.left)
-            rh = get_height(n.right)
+            lh = self.get_height(n.left)
+            rh = self.get_height(n.right)
             n.height = max(lh, rh) + 1
             balance_factor = lh - rh
             if balance_factor > 1:
-                if get_height(n.left.left) < get_height(n.left.right):
+                if self.get_height(n.left.left) < self.get_height(n.left.right):
                     self._rotate_left(n.left)
                 self._rotate_right(n)
             elif balance_factor < -1:
-                if get_height(n.right.right) < get_height(n.right.left):
+                if self.get_height(n.right.right) < self.get_height(n.right.left):
                     self._rotate_right(n.right)
                 self._rotate_left(n)
             else:
                 n = n.parent
-                
 
-    def remove(self, k, v):
-        pass
+    def _remove_one(self, node):
+        """
+        Side effect!!! Changes node. Node should have exactly one child
+        """
+        replacement = node.left or node.right
+        if node.parent:
+            if AvlTree._is_left(node):
+                node.parent.left = replacement
+            else:
+                node.parent.right = replacement
+            replacement.parent = node.parent
+            node.parent = None
+        else:
+            self._tree = replacement
+            replacement.parent = None
+        node.left = None
+        node.right = None
+        node.parent = None
+        self._rebalance(replacement)
+
+    def _remove_leaf(self, node):
+        if node.parent:
+            if AvlTree._is_left(node):
+                node.parent.left = None
+            else:
+                node.parent.right = None
+            self._rebalance(node.parent)
+        else:
+            self._tree = None
+        node.parent = None
+        node.left = None
+        node.right = None
+
+    def remove(self, k):
+        node = self._get_node(k)
+        if not node:
+            return
+        if AvlTree._is_leaf(node):
+            self._remove_leaf(node)
+            return
+        if node.left and node.right:
+            nxt = AvlTree._get_next(node)
+            node.key = nxt.key
+            node.value = nxt.value
+            if self._is_leaf(nxt):
+                self._remove_leaf(nxt)
+            else:
+                self._remove_one(nxt)
+            self._rebalance(node)
+        else:
+            self._remove_one(node)
 
     def get(self, k):
         node = self._get_node(k)
@@ -87,7 +137,11 @@ class AvlTree:
 
     @staticmethod
     def _is_left(node):
-        return node.parent.left == node
+        return node.parent.left and node.parent.left == node
+
+    @staticmethod
+    def _is_leaf(node):
+        return node.left is None and node.right is None
 
     def _rotate_right(self, node):
         if not node.parent:
@@ -103,6 +157,9 @@ class AvlTree:
         node.left.right = node
         node.parent = node.left
         node.left = bk
+        if bk:
+            bk.parent = node
+        node.height = max(self.get_height(node.left), self.get_height(node.right)) + 1
 
     def _rotate_left(self, node):
         if not node.parent:
@@ -118,4 +175,15 @@ class AvlTree:
         node.right.left = node
         node.parent = node.right
         node.right = bk
+        if bk:
+            bk.parent = node
+        node.height = max(self.get_height(node.right), self.get_height(node.left)) + 1
 
+    @staticmethod
+    def _get_next(node):
+        if not node.right:
+            return node.parent
+        n = node.right
+        while n.left:
+            n = n.left
+        return n

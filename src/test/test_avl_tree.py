@@ -1,5 +1,22 @@
 import unittest
 from src.main.avl_tree import AvlTree
+import random
+
+
+def verify(node):
+    lh = (node.left.height if node.left else 0)
+    rh = (node.right.height if node.right else 0)
+    balance_factor = lh - rh
+    h = max(lh, rh) + 1
+    if balance_factor < -1 or balance_factor > 1:
+        raise Exception("Bad balance_factor %s" % balance_factor)
+    if node.height != h:
+        raise Exception("Wrong height %s (should be %s)" % (node.height, h))
+    if node.left:
+        verify(node.left)
+    if node.right:
+        verify(node.right)
+
 
 class TestAvlTree(unittest.TestCase):
 
@@ -41,3 +58,75 @@ class TestAvlTree(unittest.TestCase):
             avl.add(i, i * 100)
         for i in range(n):
             self.assertEqual(avl.get(i), i * 100)
+
+    def test_remove_one(self):
+        avl = AvlTree()
+        avl.add(1, 2)
+        avl.remove(1)
+        self.assertTrue(avl._tree is None)
+
+    def test_remove_two(self):
+        avl = AvlTree()
+        avl.add(1, 2)
+        avl.add(2, 3)
+        avl.remove(1)
+        self.assertTrue(avl.get(1) == -1)
+        avl.remove(2)
+        self.assertTrue(avl.get(2) == -1)
+        self.assertTrue(avl._tree is None)
+
+    def test_correct_parent(self):
+        avl = AvlTree()
+        n = 6
+        for i in range(n):
+            avl.add(i, i * 100)
+        self.assertTrue(avl._tree.left.right.key == 2)
+        self.assertTrue(avl._tree.left.right.parent.key == 1)
+
+    def test_remove_6(self):
+        avl = AvlTree()
+        n = 6
+        for i in range(n):
+            avl.add(i, i * 100)
+        avl.remove(1)
+        self.assertTrue(avl.get(1) == -1)
+        self.assertTrue(avl.get(2) == 200)
+
+    def test_remove_many(self):
+        avl = AvlTree()
+        n = 100
+        for i in range(n):
+            avl.add(i, i * 100)
+        for i in range(1, n, 2):
+            avl.remove(i)
+        for i in range(0, n, 2):
+            self.assertEqual(avl.get(i), i * 100)
+        for i in range(1, n, 2):
+            self.assertEqual(avl.get(i), -1)
+
+    def test_height(self):
+        avl = AvlTree()
+        avl.add(74, 1)
+        avl.add(5, 2)
+        avl.add(55, 3)
+        self.assertTrue(avl._tree.height == 2)
+        self.assertTrue(avl._tree.left.height == 1)
+
+    def test_check_invariants(self):
+        s = set()
+        avl = AvlTree()
+        random.seed(10)
+        for _ in range(10000):
+            x = random.randint(1, 100)
+            if x in s:
+                self.assertTrue(avl.get(x) == x * 13)
+                avl.remove(x)
+                self.assertTrue(avl.get(x) == -1)
+                s.remove(x)
+            else:
+                self.assertTrue(avl.get(x) == -1)
+                avl.add(x, x * 13)
+                self.assertTrue(avl.get(x) == x * 13)
+                s.add(x)
+            verify(avl._tree)
+

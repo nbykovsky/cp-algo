@@ -7,6 +7,8 @@ class TreeNode:
         self.right = None
         self.parent = None
         self.height = 1
+        self.num_left = 1
+        self.num_total = 1
 
 
 class AvlTree:
@@ -55,6 +57,9 @@ class AvlTree:
             rh = self.get_height(n.right)
             n.height = max(lh, rh) + 1
             balance_factor = lh - rh
+            n.num_total = 1 + (n.left.num_total if n.left else 0) + (n.right.num_total if n.right else 0)
+            n.num_left  = 1 + (n.left.num_total if n.left else 0)
+
             if balance_factor > 1:
                 if self.get_height(n.left.left) < self.get_height(n.left.right):
                     self._rotate_left(n.left)
@@ -134,6 +139,21 @@ class AvlTree:
             else:
                 return node
         return None
+
+    def get_at(self, pos):
+        x = pos + 1
+        node = self._tree
+        while node:
+            if x < node.num_left:
+                node = node.left
+            elif node.num_left < x:
+                x -= node.num_left
+                node = node.right
+            else:
+                return (node.key, node.value)
+        raise IndexError("Out of ranges")
+
+
 
     @staticmethod
     def _is_left(node):

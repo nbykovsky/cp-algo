@@ -130,3 +130,26 @@ class TestAvlTree(unittest.TestCase):
                 s.add(x)
             verify(avl._tree)
 
+    def test_get_at(self):
+        avl = AvlTree()
+        avl.add(1,1)
+        avl.add(10,10)
+        avl.add(5,5)
+        avl.add(3,3)
+        avl.add(7,7)
+        self.assertEqual(avl.get_at(0), (1,1))
+        self.assertEqual(avl.get_at(1), (3,3))
+        self.assertEqual(avl.get_at(2), (5,5))
+        self.assertEqual(avl.get_at(3), (7,7))
+        self.assertEqual(avl.get_at(4), (10,10))
+        with self.assertRaises(IndexError):
+            avl.get_at(-1)
+        with self.assertRaises(IndexError):
+            avl.get_at(5)
+        avl.remove(5)
+        self.assertEqual(avl.get_at(0), (1,1))
+        self.assertEqual(avl.get_at(1), (3,3))
+        self.assertEqual(avl.get_at(2), (7,7))
+        self.assertEqual(avl.get_at(3), (10,10))
+
+

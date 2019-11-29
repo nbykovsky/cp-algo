@@ -18,6 +18,17 @@ def verify(node):
         verify(node.right)
 
 
+def verify_num(node):
+    if node.num_left != (node.left.num_total if node.left else 0) + 1:
+        raise Exception("Wrong num left %s " % node.num_left)
+    if node.num_total != (node.left.num_total if node.left else 0) + (node.right.num_total if node.right else 0) + 1:
+        raise Exception("Wrong num total %s" % node.num_total)
+    if node.left:
+        verify_num(node.left)
+    if node.right:
+        verify_num(node.right)
+
+
 class TestAvlTree(unittest.TestCase):
 
     def test_get_from_empty(self):
@@ -116,7 +127,7 @@ class TestAvlTree(unittest.TestCase):
         s = set()
         avl = AvlTree()
         random.seed(10)
-        for _ in range(10000):
+        for _ in range(3):
             x = random.randint(1, 100)
             if x in s:
                 self.assertTrue(avl.get(x) == x * 13)
@@ -129,6 +140,15 @@ class TestAvlTree(unittest.TestCase):
                 self.assertTrue(avl.get(x) == x * 13)
                 s.add(x)
             verify(avl._tree)
+
+    def test_check_invariants_nums(self):
+        s = set()
+        avl = AvlTree()
+        random.seed(1000)
+        for _ in range(3):
+            x = random.randint(1, 100)
+            avl.add(x, x * 13)
+            verify_num(avl._tree)
 
     def test_get_at(self):
         avl = AvlTree()
@@ -152,4 +172,36 @@ class TestAvlTree(unittest.TestCase):
         self.assertEqual(avl.get_at(2), (7,7))
         self.assertEqual(avl.get_at(3), (10,10))
 
+    def test_num_total(self):
+        avl = AvlTree()
+        avl.add(5,5)
+        self.assertEqual(avl._tree.num_total, 1)
+        self.assertEqual(avl._tree.num_left, 1)
+        avl.add(2, 2)
+        self.assertEqual(avl._tree.num_total, 2)
+        self.assertEqual(avl._tree.num_left, 2)
+        self.assertEqual(avl._tree.left.num_total, 1)
+        self.assertEqual(avl._tree.left.num_left, 1)
+        avl.add(0, 0)
+        self.assertEqual(avl._tree.num_total, 3)
+        self.assertEqual(avl._tree.num_left, 2)
+        self.assertEqual(avl._tree.right.num_left, 1)
+        self.assertEqual(avl._tree.right.num_total, 1)
+        self.assertEqual(avl._tree.left.num_left, 1)
+        self.assertEqual(avl._tree.left.num_total, 1)
+        avl.add(1,1)
+        verify_num(avl._tree)
+
+    def test_num_total1(self):
+        avl = AvlTree()
+        avl.add(74, 1)
+        avl.add(5, 2)
+        avl.add(55, 3)
+
+        self.assertEqual(avl._tree.num_total, 3)
+        self.assertEqual(avl._tree.num_left, 2)
+        self.assertEqual(avl._tree.right.num_left, 1)
+        self.assertEqual(avl._tree.right.num_total, 1)
+        self.assertEqual(avl._tree.left.num_left, 1)
+        self.assertEqual(avl._tree.left.num_total, 1)
 

@@ -49,6 +49,10 @@ class AvlTree:
     def get_height(x):
         return x.height if x else 0
 
+    @staticmethod
+    def get_num_total(x):
+        return x.num_total if x else 0
+
     def _rebalance(self, node):
         
         n = node
@@ -57,8 +61,8 @@ class AvlTree:
             rh = self.get_height(n.right)
             n.height = max(lh, rh) + 1
             balance_factor = lh - rh
-            n.num_total = 1 + (n.left.num_total if n.left else 0) + (n.right.num_total if n.right else 0)
-            n.num_left  = 1 + (n.left.num_total if n.left else 0)
+            n.num_total = 1 + self.get_num_total(n.left) + self.get_num_total(n.right)
+            n.num_left  = 1 + self.get_num_total(n.left)
 
             if balance_factor > 1:
                 if self.get_height(n.left.left) < self.get_height(n.left.right):
@@ -154,7 +158,6 @@ class AvlTree:
         raise IndexError("Out of ranges")
 
 
-
     @staticmethod
     def _is_left(node):
         return node.parent.left and node.parent.left == node
@@ -180,6 +183,8 @@ class AvlTree:
         if bk:
             bk.parent = node
         node.height = max(self.get_height(node.left), self.get_height(node.right)) + 1
+        node.num_total = 1 + self.get_num_total(node.left) + self.get_num_total(node.right)
+        node.num_left = 1 + self.get_num_total(node.left)
 
     def _rotate_left(self, node):
         if not node.parent:
@@ -197,7 +202,9 @@ class AvlTree:
         node.right = bk
         if bk:
             bk.parent = node
-        node.height = max(self.get_height(node.right), self.get_height(node.left)) + 1
+        node.height = max(self.get_height(node.left), self.get_height(node.right)) + 1
+        node.num_total = 1 + self.get_num_total(node.left) + self.get_num_total(node.right)
+        node.num_left = 1 + self.get_num_total(node.left)
 
     @staticmethod
     def _get_next(node):

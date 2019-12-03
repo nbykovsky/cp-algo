@@ -2,6 +2,7 @@
 import sys
 from bisect import bisect_left
 
+
 def get_time(pwr, cs, goal):
     length = 0
     cnt = 0
@@ -20,18 +21,19 @@ def get_time(pwr, cs, goal):
         cnt += 1
         length += (e - b)
     return goal + (length + cnt) * 2
-        
+
+
 def search(cs, goal, time, mn, mx):
     l, r = mn, mx
-    while l < r:
-        m = (r - l) // 2
+    while l <= r:
+        m = (r + l) // 2
         t = get_time(m, cs, goal)
-        print(l,m,r)
         if t < time:
             r = m - 1
         else:
             l = m + 1
     return l
+
 
 def solve(cs, goal, solgers, time):
     solgers.sort()
@@ -40,16 +42,17 @@ def solve(cs, goal, solgers, time):
     min_pow = search(cs, goal, time, mn, mx)
     return len(solgers) - bisect_left(solgers, min_pow)
 
+
 if __name__ == '__main__':
     lines = sys.stdin.readlines()
-    m,n,t,k = map(int, lines[0].split())
+    m, n, k, t = map(int, lines[0].split())
     aa = list(map(int, lines[1].split()))
     catches = []
     for line in lines[2:]:
-        l,r,d = map(int, line.split())
+        l, r, d = map(int, line.split())
         if l <= r:
             catches.append((l, r, d))
     catches.sort()
     print(solve(catches, n, aa, t))
 
-    
+

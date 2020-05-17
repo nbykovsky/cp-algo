@@ -1,4 +1,3 @@
-
 class TreeNode:
     def __init__(self, k, v):
         self.key = k
@@ -12,7 +11,6 @@ class TreeNode:
 
 
 class AvlTree:
-
     def __init__(self):
         self._tree = None
 
@@ -54,7 +52,7 @@ class AvlTree:
         return x.num_total if x else 0
 
     def _rebalance(self, node):
-        
+
         n = node
         while n:
             lh = self.get_height(n.left)
@@ -62,7 +60,7 @@ class AvlTree:
             n.height = max(lh, rh) + 1
             balance_factor = lh - rh
             n.num_total = 1 + self.get_num_total(n.left) + self.get_num_total(n.right)
-            n.num_left  = 1 + self.get_num_total(n.left)
+            n.num_left = 1 + self.get_num_total(n.left)
 
             if balance_factor > 1:
                 if self.get_height(n.left.left) < self.get_height(n.left.right):
@@ -130,7 +128,7 @@ class AvlTree:
     def get(self, k):
         node = self._get_node(k)
         return node.value if node else -1
-        
+
     def _get_node(self, k):
         if not self._tree:
             return None
@@ -154,9 +152,8 @@ class AvlTree:
                 x -= node.num_left
                 node = node.right
             else:
-                return (node.key, node.value)
+                return node.key, node.value
         raise IndexError("Out of ranges")
-
 
     @staticmethod
     def _is_left(node):

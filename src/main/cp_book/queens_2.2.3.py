@@ -1,9 +1,7 @@
-
-
 def queens(n):
     cols = [False] * n
-    diag1 = [False] * (2*n - 1)
-    diag2 = [False] * (2*n - 1)
+    diag1 = [False] * (2 * n - 1)
+    diag2 = [False] * (2 * n - 1)
     cnt = 0
 
     def search(r):
@@ -22,5 +20,5 @@ def queens(n):
     return cnt
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(queens(8))
